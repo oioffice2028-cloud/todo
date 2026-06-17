@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO 앱</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        li.completed span {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        .task-text {
+            flex: 1;
+        }
+
+        .delete-btn {
+            background: #ff4d4f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .delete-btn:hover {
+            background: #d9363e;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>TODO 앱</h1>
+
+    <div class="input-group">
+        <input
+            type="text"
+            id="todoInput"
+            placeholder="할 일을 입력하세요"
+        >
+        <button onclick="addTodo()">추가</button>
+    </div>
+
+    <ul id="todoList"></ul>
+</div>
+
+<script>
+    let todos = JSON.parse(localStorage.getItem("todos")) || [];
+
+    function saveTodos() {
+        localStorage.setItem("todos", JSON.stringify(todos));
+    }
+
+    function renderTodos() {
+        const list = document.getElementById("todoList");
+        list.innerHTML = "";
+
+        todos.forEach((todo, index) => {
+            const li = document.createElement("li");
+
+            if (todo.completed) {
+                li.classList.add("completed");
+            }
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = todo.completed;
+
+            checkbox.addEventListener("change", () => {
+                todos[index].completed = checkbox.checked;
+                saveTodos();
+                renderTodos();
+            });
+
+            const text = document.createElement("span");
+            text.className = "task-text";
+            text.textContent = todo.text;
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "삭제";
+            deleteBtn.className = "delete-btn";
+
+            deleteBtn.addEventListener("click", () => {
+                todos.splice(index, 1);
+                saveTodos();
+                renderTodos();
+            });
+
+            li.appendChild(checkbox);
+            li.appendChild(text);
+            li.appendChild(deleteBtn);
+
+            list.appendChild(li);
+        });
+    }
+
+    function addTodo() {
+        const input = document.getElementById("todoInput");
+        const text = input.value.trim();
+
+        if (!text) return;
+
+        todos.push({
+            text,
+            completed: false
+        });
+
+        saveTodos();
+        renderTodos();
+
+        input.value = "";
+        input.focus();
+    }
+
+    document.getElementById("todoInput")
+        .addEventListener("keypress", (event) => {
+            if (event.key === "Enter") {
+                addTodo();
+            }
+        });
+
+    renderTodos();
+</script>
+
+</body>
+</html>
